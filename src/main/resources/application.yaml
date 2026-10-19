@@ -1,3 +1,33 @@
 spring:
   application:
     name: casabuna-backend
+  profiles:
+    active: local
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 488466766390-l3v58svtvlrir3m7it0oe3o7ugaihhkk.apps.googleusercontent.com
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+          keycloak:
+            client-id: casa-buna-keycloack
+            client-secret: ${KEYCLOAK_CLIENT_SECRET}
+            scope: openid,profile,email
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            # Notice port 9000 because your Keycloak docker maps 9000:8080
+            issuer-uri: http://localhost:9000/realms/casa-buna-keycloack
+            user-name-attribute: preferred_username
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 604800000 # 7 days
+  isSecured: false
+
+logging:
+  level:
+    org.springframework.security: OFF
+    org.springframework.security.oauth2: OFF
