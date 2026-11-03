@@ -4,17 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import ro.casabuna.casabuna_backend.model.entity.UserEntity;
 import ro.casabuna.casabuna_backend.notification.model.dto.NotificationDto;
-import ro.casabuna.casabuna_backend.notification.model.entity.NotificationEntity;
-import ro.casabuna.casabuna_backend.notification.model.mapper.NotificationMapper;
-import ro.casabuna.casabuna_backend.notification.repository.NotificationRepository;
-import ro.casabuna.casabuna_backend.repository.UserRepository;
+import ro.casabuna.casabuna_backend.notification.model.event.GlobalEvent;
+import ro.casabuna.casabuna_backend.notification.model.event.UserEvent;
+import ro.casabuna.casabuna_backend.notification.model.event.UserGroupEvent;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NotificationSubscriptionServiceImpl implements NotificationSubscriptionService {
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
 
-    private final NotificationRepository notificationRepository;
-    private final UserRepository userRepository;
-    private final NotificationMapper notificationMapper;
+    private final NotificationService notificationService;
 
     @Override
     public SseEmitter subscribe(Long userId) {
@@ -50,58 +44,35 @@ public class NotificationSubscriptionServiceImpl implements NotificationSubscrip
     }
 
     @Override
-    public void sendNotification(Long userId, String title, String message) {
-        UserEntity userEntity = userRepository.getReferenceById(userId);
-        NotificationEntity notification = NotificationEntity.builder()
-                .user(userEntity)
-                .title(title)
-                .message(message)
-                .read(false)
-                .build();
-        NotificationDto notificationDto = notificationMapper.toDto(notificationRepository.save(notification));
-
-        SseEmitter emitter = emitters.get(userId);
+    public void sendUserNotification(UserEvent event) {
+        NotificationDto notificationDto = notificationService.saveUserNotification(event.userId(), event.title(), event.message());
+        SseEmitter emitter = emitters.get(event.userId());
         if (emitter != null) {
             try {
                 emitter.send(SseEmitter.event().data(notificationDto));
             } catch (IOException e) {
-                emitters.remove(userId);
+                emitters.remove(event.userId());
             }
         }
     }
 
     @Override
-    @Transactional
-    public void sendGlobalNotification(String title, String message) {
-        List<NotificationEntity> notificationEntities = userRepository.findAllIds().stream()
-                .map(id -> NotificationEntity.builder()
-                        .user(userRepository.getReferenceById(id))
-                        .title(title)
-                        .message(message)
-                        .read(false)
-                        .createdAt(LocalDateTime.now())
-                        .build())
-                .toList();
+    public void sendUserGroupNotification(UserGroupEvent event) {
+        final List<NotificationDto> notificationsToSend = notificationService.saveUserGroupNotification(
+                emitters.keySet(),
+                event.roles(),
+                event.title(),
+                event.message());
+        emitNotifications(notificationsToSend);
+    }
 
-        List<NotificationDto> notificationsToSend = notificationRepository.saveAll(notificationEntities)
-                .stream()
-                .filter(entity -> emitters.containsKey(entity.getUser().getId()))
-                .map(notificationMapper::toDto)
-                .toList();
-
-        List<Long> failedEmitters = new ArrayList<>();
-        for (NotificationDto notificationDto : notificationsToSend) {
-            Long userId = notificationDto.userId();
-            SseEmitter sseEmitter = emitters.get(userId);
-            if (sseEmitter != null) {
-                try {
-                    sseEmitter.send(SseEmitter.event().data(notificationDto));
-                } catch (IOException e) {
-                    failedEmitters.add(userId);
-                }
-            }
-        }
-        failedEmitters.forEach(emitters::remove);
+    @Override
+    public void sendGlobalNotification(GlobalEvent event) {
+        final List<NotificationDto> notificationsToSend = notificationService.saveGlobalNotification(
+                emitters.keySet(),
+                event.title(),
+                event.message());
+        emitNotifications(notificationsToSend);
     }
 
     @Scheduled(fixedRate = 10000)
@@ -114,6 +85,22 @@ public class NotificationSubscriptionServiceImpl implements NotificationSubscrip
                 entry.getValue().send(SseEmitter.event().comment("heartbeat"));
             } catch (IOException e) {
                 failedEmitters.add(entry.getKey());
+            }
+        }
+        failedEmitters.forEach(emitters::remove);
+    }
+
+    private void emitNotifications(List<NotificationDto> notificationsToSend) {
+        List<Long> failedEmitters = new ArrayList<>();
+        for (NotificationDto notificationDto : notificationsToSend) {
+            Long userId = notificationDto.userId();
+            SseEmitter sseEmitter = emitters.get(userId);
+            if (sseEmitter != null) {
+                try {
+                    sseEmitter.send(SseEmitter.event().data(notificationDto));
+                } catch (IOException e) {
+                    failedEmitters.add(userId);
+                }
             }
         }
         failedEmitters.forEach(emitters::remove);

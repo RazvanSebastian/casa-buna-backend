@@ -8,11 +8,14 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import ro.casabuna.casabuna_backend.model.dto.user.RoleName;
 import ro.casabuna.casabuna_backend.model.entity.UserEntity;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity> {
@@ -29,5 +32,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
     Page<UserEntity> findAll(@Nullable Specification<UserEntity> spec, Pageable pageable);
 
     @Query("SELECT u.id FROM UserEntity u")
-    List<Long> findAllIds();
+    Set<Long> findAllIds();
+
+    @Query("SELECT DISTINCT u.id FROM UserEntity u JOIN u.roles r WHERE r.name IN :roles")
+    Set<Long> findIdsByRoles(@Param("roles") Set<RoleName> roles);
 }

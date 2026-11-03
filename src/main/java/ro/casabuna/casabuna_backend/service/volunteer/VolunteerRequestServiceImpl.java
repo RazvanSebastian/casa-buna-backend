@@ -2,7 +2,6 @@ package ro.casabuna.casabuna_backend.service.volunteer;
 
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +16,8 @@ import ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestStatus;
 import ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestWithUserResponseDto;
 import ro.casabuna.casabuna_backend.model.mapper.volunteer.VolunteerRequestMapper;
 import ro.casabuna.casabuna_backend.model.query.PageQuery;
-import ro.casabuna.casabuna_backend.notification.model.event.VolunteerRequestStatusChangeEvent;
+import ro.casabuna.casabuna_backend.notification.model.event.UserEvent;
+import ro.casabuna.casabuna_backend.notification.model.event.UserGroupEvent;
 import ro.casabuna.casabuna_backend.repository.UserRepository;
 import ro.casabuna.casabuna_backend.repository.VolunteerRequestRepository;
 import ro.casabuna.casabuna_backend.repository.specification.VolunteerSpecification;
@@ -27,6 +27,9 @@ import ro.casabuna.casabuna_backend.service.profile.UserProfileService;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import static ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestStatus.APPROVED;
 
 @Transactional(readOnly = true)
 @Service
@@ -55,7 +58,7 @@ public class VolunteerRequestServiceImpl implements VolunteerRequestService {
         requestEntity.setStatus(status);
         requestEntity.setApprover(userRepository.getReferenceById(approverId));
 
-        if (status == VolunteerRequestStatus.APPROVED) {
+        if (status == APPROVED) {
             // at this moment the user has only ROLE_USER
             var roles = new HashSet<>(List.of(RoleName.ROLE_USER, RoleName.ROLE_VOLUNTEER));
             userAdministrationService.updateRoles(requestEntity.getRequestor().getId(), roles);
@@ -73,9 +76,10 @@ public class VolunteerRequestServiceImpl implements VolunteerRequestService {
         volunteerRequestRepository.save(requestEntity);
 
         eventPublisher.publishEvent(
-                new VolunteerRequestStatusChangeEvent(
+                new UserEvent(
                         requestEntity.getRequestor().getId(),
-                        status == VolunteerRequestStatus.APPROVED)
+                        "Cerere voluntariat",
+                        status == APPROVED ? "Cerere aprobata" : "Cerere refuzata")
         );
     }
 
@@ -91,6 +95,15 @@ public class VolunteerRequestServiceImpl implements VolunteerRequestService {
         newRequestEntity.setRequestor(userRepository.getReferenceById(userId));
 
         newRequestEntity = volunteerRequestRepository.save(newRequestEntity);
+
+        eventPublisher.publishEvent(
+                new UserGroupEvent(
+                        Set.of(RoleName.ROLE_ADMIN),
+                        "Cerere voluntariat",
+                        "O noua cerere de voluntariat a fost primita"
+                )
+        );
+
         return volunteerRequestMapper.toDto(newRequestEntity);
     }
 
