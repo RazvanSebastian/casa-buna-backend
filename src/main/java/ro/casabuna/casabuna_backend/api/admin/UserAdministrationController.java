@@ -6,9 +6,10 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ro.casabuna.casabuna_backend.model.dto.RoleName;
-import ro.casabuna.casabuna_backend.model.dto.RoleDto;
-import ro.casabuna.casabuna_backend.model.dto.UserDto;
+import ro.casabuna.casabuna_backend.model.dto.user.RoleName;
+import ro.casabuna.casabuna_backend.model.dto.user.RoleDto;
+import ro.casabuna.casabuna_backend.model.dto.user.UserDto;
+import ro.casabuna.casabuna_backend.model.query.PageQuery;
 import ro.casabuna.casabuna_backend.service.admin.UserAdministrationService;
 
 import java.util.Set;
@@ -34,8 +35,8 @@ public class UserAdministrationController {
     }
 
     @GetMapping("/all")
-    public PagedModel<UserDto> getAllUsers(@RequestParam(name = "page", defaultValue = "1") int page,
+    public PagedModel<UserDto> getAllUsers(@ModelAttribute PageQuery pageQuery,
                                            @RequestParam(name = "email", required = false) @Nullable String email) {
-        return userAdministrationService.getAllUsers(page, email);
+        return userAdministrationService.getAllUsers(pageQuery, email);
     }
 }

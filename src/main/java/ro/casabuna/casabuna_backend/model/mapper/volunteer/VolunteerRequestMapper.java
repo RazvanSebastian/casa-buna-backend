@@ -3,7 +3,7 @@ package ro.casabuna.casabuna_backend.model.mapper.volunteer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import ro.casabuna.casabuna_backend.model.dto.UserDetailsDto;
+import ro.casabuna.casabuna_backend.model.dto.user.UserDetailsDto;
 import ro.casabuna.casabuna_backend.model.dto.volunteer.NewVolunteerRequestDto;
 import ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestResponseDto;
 import ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestWithUserResponseDto;

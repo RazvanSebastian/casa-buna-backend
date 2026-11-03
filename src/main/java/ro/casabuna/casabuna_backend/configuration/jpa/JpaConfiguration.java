@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
-@EnableJpaRepositories(basePackages = "ro.casabuna.casabuna_backend.repository")
+@EnableJpaRepositories(basePackages = {"ro.casabuna.casabuna_backend.repository", "ro.casabuna.casabuna_backend.notification.repository"})
 public class JpaConfiguration {
 }

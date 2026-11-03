@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ro.casabuna.casabuna_backend.model.dto.RoleName;
+import ro.casabuna.casabuna_backend.model.dto.user.RoleName;
 
 @Entity
 @Table(name = "roles")

@@ -3,10 +3,10 @@ package ro.casabuna.casabuna_backend.configuration.security.oauth;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ro.casabuna.casabuna_backend.model.dto.RoleDto;
-import ro.casabuna.casabuna_backend.model.dto.UserDto;
-import ro.casabuna.casabuna_backend.model.dto.RoleName;
-import ro.casabuna.casabuna_backend.service.UserService;
+import ro.casabuna.casabuna_backend.model.dto.user.RoleDto;
+import ro.casabuna.casabuna_backend.model.dto.user.UserDto;
+import ro.casabuna.casabuna_backend.model.dto.user.RoleName;
+import ro.casabuna.casabuna_backend.service.user.UserService;
 
 import java.util.Set;
 

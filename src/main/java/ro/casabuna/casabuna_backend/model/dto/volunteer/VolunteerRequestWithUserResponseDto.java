@@ -1,7 +1,7 @@
 package ro.casabuna.casabuna_backend.model.dto.volunteer;
 
 import ro.casabuna.casabuna_backend.model.dto.AuditableDto;
-import ro.casabuna.casabuna_backend.model.dto.UserDetailsDto;
+import ro.casabuna.casabuna_backend.model.dto.user.UserDetailsDto;
 
 import java.time.LocalDateTime;
 import java.util.List;

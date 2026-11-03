@@ -4,6 +4,8 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestStatus;
 import ro.casabuna.casabuna_backend.model.entity.UserEntity;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 
 import static com.nimbusds.oauth2.sdk.util.StringUtils.isNotBlank;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class VolunteerSpecification {
 
     public static Specification<VolunteerRequestEntity> withFilters(VolunteerRequestStatus status, @Nullable String requestorEmail) {

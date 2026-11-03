@@ -6,6 +6,7 @@ import ro.casabuna.casabuna_backend.model.dto.volunteer.NewVolunteerRequestDto;
 import ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestResponseDto;
 import ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestStatus;
 import ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestWithUserResponseDto;
+import ro.casabuna.casabuna_backend.model.query.PageQuery;
 
 import java.util.Optional;
 
@@ -17,5 +18,5 @@ public interface VolunteerRequestService {
 
     Optional<VolunteerRequestResponseDto> getRequestInPending(Long userId);
 
-    PagedModel<VolunteerRequestWithUserResponseDto> getAllRequests(int page, @Nullable String requestorEmail, VolunteerRequestStatus status);
+    PagedModel<VolunteerRequestWithUserResponseDto> getAllRequests(PageQuery pageQuery, @Nullable String requestorEmail, VolunteerRequestStatus status);
 }

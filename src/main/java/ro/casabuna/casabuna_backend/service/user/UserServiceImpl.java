@@ -1,13 +1,13 @@
-package ro.casabuna.casabuna_backend.service;
+package ro.casabuna.casabuna_backend.service.user;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ro.casabuna.casabuna_backend.model.entity.RoleEntity;
-import ro.casabuna.casabuna_backend.model.dto.RoleName;
+import ro.casabuna.casabuna_backend.model.dto.user.RoleName;
 import ro.casabuna.casabuna_backend.model.entity.UserEntity;
-import ro.casabuna.casabuna_backend.model.dto.RoleDto;
-import ro.casabuna.casabuna_backend.model.dto.UserDto;
+import ro.casabuna.casabuna_backend.model.dto.user.RoleDto;
+import ro.casabuna.casabuna_backend.model.dto.user.UserDto;
 import ro.casabuna.casabuna_backend.repository.RoleRepository;
 import ro.casabuna.casabuna_backend.repository.UserRepository;
 
@@ -28,6 +28,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findWithRolesByEmail(email).map(UserDto::new);
     }
 
+    @Transactional
     @Override
     public UserDto save(UserDto userDto) {
         Set<RoleName> roleNames = userDto.roles()

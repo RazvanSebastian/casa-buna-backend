@@ -19,6 +19,7 @@ import ro.casabuna.casabuna_backend.model.dto.volunteer.NewVolunteerRequestDto;
 import ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestStatus;
 import ro.casabuna.casabuna_backend.model.entity.UserEntity;
 import ro.casabuna.casabuna_backend.model.entity.volunteer.VolunteerRequestEntity;
+import ro.casabuna.casabuna_backend.model.query.PageQuery;
 import ro.casabuna.casabuna_backend.repository.UserRepository;
 import ro.casabuna.casabuna_backend.repository.VolunteerRequestRepository;
 import ro.casabuna.casabuna_backend.service.volunteer.VolunteerRequestService;
@@ -135,7 +136,7 @@ public class VolunteerRequestServiceIntegrationTest {
         );
 
         // when
-        var result = volunteerRequestService.getAllRequests(0, null, VolunteerRequestStatus.PENDING);
+        var result = volunteerRequestService.getAllRequests(new PageQuery(0, 10), null, VolunteerRequestStatus.PENDING);
 
         // then
         assertEquals(1, result.getContent().size());
@@ -167,7 +168,7 @@ public class VolunteerRequestServiceIntegrationTest {
         );
 
         // when
-        var result = volunteerRequestService.getAllRequests(0, "test@test.ro", VolunteerRequestStatus.PENDING);
+        var result = volunteerRequestService.getAllRequests(new PageQuery(0, 10), "test@test.ro", VolunteerRequestStatus.PENDING);
 
         // then
         assertEquals(1, result.getContent().size());

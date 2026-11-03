@@ -35,4 +35,11 @@ public class GlobalExceptionHandler {
         error.put("error", ex.getMessage());
         return ResponseEntity.badRequest().body(error);
     }
+
+    @ExceptionHandler(ResourceUnchangeableException.class)
+    public ResponseEntity<Map<String, String>> handleResourceUnchangeable(ResourceUnchangeableException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.badRequest().body(error);
+    }
 }

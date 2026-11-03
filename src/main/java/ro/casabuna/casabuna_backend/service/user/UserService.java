@@ -1,6 +1,6 @@
-package ro.casabuna.casabuna_backend.service;
+package ro.casabuna.casabuna_backend.service.user;
 
-import ro.casabuna.casabuna_backend.model.dto.UserDto;
+import ro.casabuna.casabuna_backend.model.dto.user.UserDto;
 
 import java.util.Optional;
 

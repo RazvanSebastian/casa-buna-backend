@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ro.casabuna.casabuna_backend.model.entity.UserEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -26,4 +27,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
 
     @EntityGraph(attributePaths = {"roles"})
     Page<UserEntity> findAll(@Nullable Specification<UserEntity> spec, Pageable pageable);
+
+    @Query("SELECT u.id FROM UserEntity u")
+    List<Long> findAllIds();
 }

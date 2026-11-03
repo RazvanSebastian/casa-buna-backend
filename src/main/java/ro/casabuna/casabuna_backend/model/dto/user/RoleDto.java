@@ -1,4 +1,4 @@
-package ro.casabuna.casabuna_backend.model.dto;
+package ro.casabuna.casabuna_backend.model.dto.user;
 
 import ro.casabuna.casabuna_backend.model.entity.RoleEntity;
 

@@ -36,7 +36,7 @@ INSERT INTO roles (name) VALUES ('ROLE_VOLUNTEER') ON CONFLICT (name) DO NOTHING
 CREATE TABLE IF NOT EXISTS user_profiles (
     user_id BIGINT PRIMARY KEY,
     phone VARCHAR(255),
-    job_details VARCHAR(255),
+    self_description VARCHAR(255),
     age INTEGER,
     CONSTRAINT fk_user_profiles_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -68,6 +68,20 @@ CREATE TABLE IF NOT EXISTS volunteer_requests (
     last_modified_by_user_id BIGINT,
     CONSTRAINT fk_volunteer_requests_requestor FOREIGN KEY (requestor_user_id) REFERENCES users(id) ON DELETE SET NULL,
     CONSTRAINT fk_volunteer_requests_approver FOREIGN KEY (approver_user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Create sequence for notifications
+CREATE SEQUENCE IF NOT EXISTS notifications_seq START WITH 1 INCREMENT BY 1;
+
+-- Create notifications table
+CREATE TABLE IF NOT EXISTS notifications (
+    id BIGINT PRIMARY KEY DEFAULT nextval('notifications_seq'),
+    title VARCHAR(255) NOT NULL,
+    message VARCHAR(255) NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id BIGINT,
+    CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Insert default admin

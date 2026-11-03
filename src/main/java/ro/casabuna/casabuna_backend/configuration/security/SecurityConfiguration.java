@@ -38,6 +38,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/user/**").authenticated()
                         .requestMatchers("/api/volunteer/request/**").authenticated()
+                        .requestMatchers("/api/notifications").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest()
                         .authenticated()

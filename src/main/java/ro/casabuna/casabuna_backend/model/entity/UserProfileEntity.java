@@ -21,8 +21,8 @@ public class UserProfileEntity {
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "job_details")
-    private String jobDetails;
+    @Column(name = "self_description")
+    private String selfDescription;
 
     @Column(name = "age")
     private int age;

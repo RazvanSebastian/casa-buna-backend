@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import ro.casabuna.casabuna_backend.model.dto.UserDto;
+import ro.casabuna.casabuna_backend.model.dto.user.UserDto;
 import ro.casabuna.casabuna_backend.configuration.security.jwt.JwtProperties;
 import ro.casabuna.casabuna_backend.configuration.security.jwt.JwtTokenProvider;
 

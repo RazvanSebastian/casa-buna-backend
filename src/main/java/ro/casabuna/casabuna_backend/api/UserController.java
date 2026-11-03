@@ -5,8 +5,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ro.casabuna.casabuna_backend.model.dto.UserDto;
-import ro.casabuna.casabuna_backend.service.UserService;
+import ro.casabuna.casabuna_backend.model.dto.user.UserDto;
+import ro.casabuna.casabuna_backend.service.user.UserService;
 
 @RestController
 @RequestMapping("/api/user")

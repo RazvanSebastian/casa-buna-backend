@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ro.casabuna.casabuna_backend.configuration.security.jwt.UserPrincipal;
 import ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestStatus;
 import ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestWithUserResponseDto;
+import ro.casabuna.casabuna_backend.model.query.PageQuery;
 import ro.casabuna.casabuna_backend.service.volunteer.VolunteerRequestService;
 
 @RestController
@@ -28,9 +29,9 @@ public class VolunteerAdministrationController {
 
     @GetMapping("/request/all")
     public PagedModel<VolunteerRequestWithUserResponseDto> findAll(
-            @RequestParam(name = "page", defaultValue = "10") int page,
+            @ModelAttribute PageQuery pageQuery,
             @RequestParam(name = "status", defaultValue = "PENDING") VolunteerRequestStatus status,
             @RequestParam(name="requestorEmail", required = false) String requestorEmail) {
-        return volunteerRequestService.getAllRequests(page, requestorEmail, status);
+        return volunteerRequestService.getAllRequests(pageQuery, requestorEmail, status);
     }
 }
