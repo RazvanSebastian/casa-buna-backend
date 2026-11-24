@@ -20,13 +20,12 @@ import ro.casabuna.casabuna_backend.notification.model.event.UserEvent;
 import ro.casabuna.casabuna_backend.notification.model.event.UserGroupEvent;
 import ro.casabuna.casabuna_backend.repository.UserRepository;
 import ro.casabuna.casabuna_backend.repository.VolunteerRequestRepository;
-import ro.casabuna.casabuna_backend.repository.specification.VolunteerSpecification;
+import ro.casabuna.casabuna_backend.repository.specification.VolunteerRequestSpecification;
 import ro.casabuna.casabuna_backend.service.admin.UserAdministrationService;
 import ro.casabuna.casabuna_backend.service.profile.UserProfileService;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static ro.casabuna.casabuna_backend.model.dto.volunteer.VolunteerRequestStatus.APPROVED;
@@ -107,17 +106,17 @@ public class VolunteerRequestServiceImpl implements VolunteerRequestService {
         return volunteerRequestMapper.toDto(newRequestEntity);
     }
 
-
     @Override
-    public Optional<VolunteerRequestResponseDto> getRequestInPending(Long userId) {
+    public VolunteerRequestResponseDto getRequestInPending(Long userId) {
         return volunteerRequestRepository.findByRequestor_IdAndStatus(userId, VolunteerRequestStatus.PENDING)
-                .map(volunteerRequestMapper::toDto);
+                .map(volunteerRequestMapper::toDto)
+                .orElseThrow(() -> new ResourceNotFound("Request not found"));
     }
 
     @Override
     public PagedModel<VolunteerRequestWithUserResponseDto> getAllRequests(PageQuery pageQuery, String requestorEmail, VolunteerRequestStatus status) {
         status = status == null ? VolunteerRequestStatus.PENDING : status;
-        var spec = VolunteerSpecification.withFilters(status, requestorEmail);
+        var spec = VolunteerRequestSpecification.withFilters(status, requestorEmail);
         return new PagedModel<>(volunteerRequestRepository.findAll(spec, pageQuery.toPageRequest())
                 .map(volunteerRequestMapper::toDtoWithUser));
     }

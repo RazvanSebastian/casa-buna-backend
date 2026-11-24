@@ -18,21 +18,26 @@ import java.util.ArrayList;
 import static com.nimbusds.oauth2.sdk.util.StringUtils.isNotBlank;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class VolunteerSpecification {
+public class VolunteerRequestSpecification {
 
     public static Specification<VolunteerRequestEntity> withFilters(VolunteerRequestStatus status, @Nullable String requestorEmail) {
         return (root, query, criteriaBuilder) -> {
             var predicates = new ArrayList<Predicate>();
-
-            root.fetch(VolunteerRequestEntity_.approver, JoinType.LEFT);
-            var requestorJoin = (Join<VolunteerRequestEntity, UserEntity>) root.fetch(VolunteerRequestEntity_.requestor, JoinType.LEFT);
-
             predicates.add(criteriaBuilder.equal(root.get(VolunteerRequestEntity_.STATUS), status));
 
-            if (isNotBlank(requestorEmail)) {
-                predicates.add(criteriaBuilder.like(requestorJoin.get(UserEntity_.EMAIL), requestorEmail));
+            Join<VolunteerRequestEntity, UserEntity> requestorJoin;
+
+            boolean isCount = query.getResultType() == Long.class || query.getResultType() == long.class;
+            if (!isCount) {
+                requestorJoin = (Join<VolunteerRequestEntity, UserEntity>) root.fetch(VolunteerRequestEntity_.requestor, JoinType.LEFT);
+                query.distinct(true);
+            } else {
+                requestorJoin = root.join(VolunteerRequestEntity_.requestor, JoinType.LEFT);
             }
 
+            if (isNotBlank(requestorEmail)) {
+                predicates.add(criteriaBuilder.like(requestorJoin.get(UserEntity_.EMAIL), "%" + requestorEmail + "%"));
+            }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }

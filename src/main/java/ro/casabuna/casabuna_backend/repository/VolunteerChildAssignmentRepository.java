@@ -1,0 +1,25 @@
+package ro.casabuna.casabuna_backend.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import ro.casabuna.casabuna_backend.model.entity.UserEntity;
+import ro.casabuna.casabuna_backend.model.entity.team.TeamEntity;
+import ro.casabuna.casabuna_backend.model.entity.team.VolunteerChildAssignmentEntity;
+
+import java.util.Optional;
+
+@Repository
+public interface VolunteerChildAssignmentRepository extends JpaRepository<VolunteerChildAssignmentEntity, Long>, JpaSpecificationExecutor<VolunteerChildAssignmentEntity> {
+
+    Optional<VolunteerChildAssignmentEntity> findByVolunteerAndChildAndTeam(UserEntity volunteer, UserEntity child, TeamEntity team);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM VolunteerChildAssignmentEntity a WHERE a.team = :team AND (a.volunteer = :user OR a.child = :user)")
+    void deleteByTeamAndUser(@Param("team") TeamEntity team, @Param("user") UserEntity user);
+}

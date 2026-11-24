@@ -7,6 +7,7 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import ro.casabuna.casabuna_backend.exception.ResourceNotFound;
 import ro.casabuna.casabuna_backend.model.dto.user.RoleName;
 import ro.casabuna.casabuna_backend.model.entity.UserEntity;
 import ro.casabuna.casabuna_backend.model.query.PageQuery;
@@ -24,7 +25,6 @@ import java.util.Set;
 
 @Service
 @AllArgsConstructor
-@Slf4j
 public class NotificationServiceImpl implements NotificationService {
 
     private final UserRepository userRepository;
@@ -42,7 +42,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional(readOnly = true)
     @Override
     public NotificationsPreviewDto getNotificationsPreview(Long userId) {
-        int counter = notificationRepository.countUnreadByUserId(userId);
+        var counter = notificationRepository.countUnreadByUserId(userId);
         var spec = NotificationSpecifications.latestByUser(userId);
         List<NotificationDto> latest = notificationRepository.findAll(spec, PageRequest.of(0, 5))
                 .stream()
@@ -52,9 +52,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
 
+    @Transactional
     @Override
-    public boolean markToRead(Long userId, Long notificationId) {
-        return notificationRepository.markAsRead(notificationId, userId) > 0;
+    public void markToRead(Long userId, Long notificationId) {
+        var success = notificationRepository.markAsRead(notificationId, userId) > 0;
+        if (!success) {
+            throw new ResourceNotFound("No changes due to missing resource");
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -74,7 +78,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public List<NotificationDto> saveUserGroupNotification(Set<Long> subscribedUserIds, Set<RoleName> roles, String title, String message) {
-        Set<Long> userIds = userRepository.findIdsByRoles(roles);
+        var userIds = userRepository.findIdsByRoles(roles);
         return saveForUsers(userIds, title, message).stream()
                 .filter(entity -> subscribedUserIds.contains(entity.getUser().getId()))
                 .map(notificationMapper::toDto)
@@ -84,7 +88,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public List<NotificationDto> saveGlobalNotification(Set<Long> subscribedUserIds, String title, String message) {
-        Set<Long> userIds = userRepository.findAllIds();
+        var userIds = userRepository.findAllIds();
         return saveForUsers(userIds, title, message)
                 .stream()
                 .filter(entity -> subscribedUserIds.contains(entity.getUser().getId()))
@@ -93,7 +97,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private List<NotificationEntity> saveForUsers(Set<Long> userIds, String title, String message) {
-        List<NotificationEntity> notificationEntities = userIds.stream()
+        var notificationEntities = userIds.stream()
                 .map(id -> NotificationEntity.builder()
                         .user(userRepository.getReferenceById(id))
                         .title(title)

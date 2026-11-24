@@ -16,7 +16,7 @@ public interface VolunteerRequestService {
 
     VolunteerRequestResponseDto createRequest(Long userId, NewVolunteerRequestDto requestModel);
 
-    Optional<VolunteerRequestResponseDto> getRequestInPending(Long userId);
+    VolunteerRequestResponseDto getRequestInPending(Long userId);
 
     PagedModel<VolunteerRequestWithUserResponseDto> getAllRequests(PageQuery pageQuery, @Nullable String requestorEmail, VolunteerRequestStatus status);
 }

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -43,11 +42,10 @@ public class NotificationController {
     }
 
     @PatchMapping("/{id}/read")
-    public ResponseEntity<?> markAsRead(
+    public void markAsRead(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable("id") Long id) {
-        boolean isChanged = notificationService.markToRead(user.id(), id);
-        return isChanged ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        notificationService.markToRead(user.id(), id);
     }
 
     @GetMapping(value = "/test")

@@ -15,7 +15,7 @@ public interface NotificationService {
 
     NotificationsPreviewDto getNotificationsPreview(Long userId);
 
-    boolean markToRead(Long userId, Long notificationId);
+    void markToRead(Long userId, Long notificationId);
 
     NotificationDto saveUserNotification(Long userId, String title, String message);
 

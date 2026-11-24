@@ -2,7 +2,6 @@ package ro.casabuna.casabuna_backend.service.admin;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import ro.casabuna.casabuna_backend.model.dto.user.RoleName;
 import ro.casabuna.casabuna_backend.model.entity.UserEntity;
 import ro.casabuna.casabuna_backend.exception.ResourceNotFound;
 import ro.casabuna.casabuna_backend.model.dto.user.RoleDto;
+import ro.casabuna.casabuna_backend.model.mapper.user.UserMapper;
 import ro.casabuna.casabuna_backend.model.query.PageQuery;
 import ro.casabuna.casabuna_backend.repository.RoleRepository;
 import ro.casabuna.casabuna_backend.repository.UserRepository;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class UserAdministrationServiceImpl implements UserAdministrationService {
-
+    private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
@@ -42,9 +42,9 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
 
     @Override
     public PagedModel<UserDto> getAllUsers(PageQuery pageQuery, String email) {
-        Specification<UserEntity> spec = UserSpecifications.equalsIfPresent("email", email);
+        Specification<UserEntity> spec = UserSpecifications.equalsIfPresent("email", email, true);
         Page<UserDto> userModelPage = userRepository.findAll(spec, pageQuery.toPageRequest())
-                .map(UserDto::new);
+                .map(userMapper::toUserDtoWithRoles);
         return new PagedModel<>(userModelPage);
     }
 

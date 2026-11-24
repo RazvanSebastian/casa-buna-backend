@@ -8,6 +8,7 @@ import ro.casabuna.casabuna_backend.model.dto.user.RoleName;
 import ro.casabuna.casabuna_backend.model.entity.UserEntity;
 import ro.casabuna.casabuna_backend.model.dto.user.RoleDto;
 import ro.casabuna.casabuna_backend.model.dto.user.UserDto;
+import ro.casabuna.casabuna_backend.model.mapper.user.UserMapper;
 import ro.casabuna.casabuna_backend.repository.RoleRepository;
 import ro.casabuna.casabuna_backend.repository.UserRepository;
 
@@ -19,13 +20,13 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
-
+    private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
     @Override
     public Optional<UserDto> findWithRolesByEmail(String email) {
-        return userRepository.findWithRolesByEmail(email).map(UserDto::new);
+        return userRepository.findWithRolesByEmail(email).map(userMapper::toUserDtoWithRoles);
     }
 
     @Transactional
@@ -45,7 +46,8 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         userEntity = userRepository.save(userEntity);
-        return new UserDto(userEntity);
+
+        return userMapper.toUserDtoWithRoles(userEntity);
     }
 
 }

@@ -17,10 +17,8 @@ public class VolunteerRequestController {
     private final VolunteerRequestService volunteerRequestService;
 
     @GetMapping
-    public ResponseEntity<VolunteerRequestResponseDto> getRequestInPending(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return volunteerRequestService.getRequestInPending(userPrincipal.id())
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public VolunteerRequestResponseDto getRequestInPending(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return volunteerRequestService.getRequestInPending(userPrincipal.id());
     }
 
     @PostMapping

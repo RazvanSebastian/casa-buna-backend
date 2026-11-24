@@ -40,6 +40,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/volunteer/request/**").authenticated()
                         .requestMatchers("/api/notifications").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/manager/**").hasAnyRole("MANAGER", "ADMIN")
+                        .requestMatchers("/api/child/**").hasAnyRole("CHILD", "MANAGER", "ADMIN")
                         .anyRequest()
                         .authenticated()
                 )
@@ -71,7 +73,7 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/error", "/login/**", "/oauth2/**").permitAll()
+                        .requestMatchers("/", "/error", "/login/**", "/oauth2/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oAuth2LoginConfigurer -> oAuth2LoginConfigurer

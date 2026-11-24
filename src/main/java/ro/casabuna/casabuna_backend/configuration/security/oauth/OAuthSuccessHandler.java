@@ -32,12 +32,13 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         UserDto userDto = oAuthUserService.saveIfNotExists((OAuth2User) authentication.getPrincipal());
         String jwtToken = getJwtToken(userDto);
         appendJwtCookie(response, jwtToken);
         getRedirectStrategy().sendRedirect(request, response, "http://localhost:4200");
     }
+
 
     private String getJwtToken(UserDto userDto) {
         Set<String> roles = userDto.roles().stream()

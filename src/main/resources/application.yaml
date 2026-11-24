@@ -31,3 +31,5 @@ logging:
   level:
     org.springframework.security: OFF
     org.springframework.security.oauth2: OFF
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE

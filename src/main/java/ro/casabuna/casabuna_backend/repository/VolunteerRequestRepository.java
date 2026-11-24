@@ -1,8 +1,5 @@
 package ro.casabuna.casabuna_backend.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -17,6 +14,4 @@ public interface VolunteerRequestRepository extends JpaRepository<VolunteerReque
     boolean existsByRequestor_IdAndStatus(Long userId, VolunteerRequestStatus status);
 
     Optional<VolunteerRequestEntity> findByRequestor_IdAndStatus(Long userId, VolunteerRequestStatus status);
-
-    Page<VolunteerRequestEntity> findAll(Specification<VolunteerRequestEntity> specification, Pageable pageable);
 }
