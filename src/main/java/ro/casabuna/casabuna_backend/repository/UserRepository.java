@@ -31,8 +31,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
     @Query("SELECT DISTINCT u.id FROM UserEntity u JOIN u.roles r WHERE r.name IN :roles")
     Set<Long> findIdsByRoles(@Param("roles") Set<RoleName> roles);
 
-    boolean existsByIdAndTeamsId(Long id, Long teamId);
-
     @Query("SELECT COUNT(u) > 0 FROM UserEntity u JOIN u.teams t JOIN u.roles r WHERE u.id = :userId AND t.id = :teamId AND r.name IN :roleNames")
     boolean existsByIdAndTeamIdAndRoleNames(@Param("userId") Long userId, @Param("teamId") Long teamId, @Param("roleNames") Set<RoleName> roleNames);
 

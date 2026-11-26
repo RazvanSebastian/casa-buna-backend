@@ -30,10 +30,13 @@ CREATE TABLE IF NOT EXISTS user_roles
     CONSTRAINT fk_user_roles_role FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE
 );
 
+-- Create sequence for teams
+CREATE SEQUENCE IF NOT EXISTS teams_seq START WITH 1 INCREMENT BY 1;
+
 -- Create teams table
 CREATE TABLE IF NOT EXISTS teams
 (
-    id                       BIGINT PRIMARY KEY DEFAULT nextval('users_seq'),
+    id                       BIGINT PRIMARY KEY DEFAULT nextval('teams_seq'),
     name                     VARCHAR(255),
     created_at               TIMESTAMP NOT NULL,
     updated_at               TIMESTAMP,

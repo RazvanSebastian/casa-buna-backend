@@ -11,6 +11,7 @@ import ro.casabuna.casabuna_backend.model.entity.UserEntity;
 import ro.casabuna.casabuna_backend.model.entity.team.TeamEntity;
 import ro.casabuna.casabuna_backend.model.entity.team.VolunteerChildAssignmentEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,6 +21,18 @@ public interface VolunteerChildAssignmentRepository extends JpaRepository<Volunt
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM VolunteerChildAssignmentEntity a WHERE a.team = :team AND (a.volunteer = :user OR a.child = :user)")
+    @Query("""
+            DELETE FROM VolunteerChildAssignmentEntity assignment
+            WHERE assignment.team = :team AND (assignment.volunteer = :user OR assignment.child = :user)
+            """)
     void deleteByTeamAndUser(@Param("team") TeamEntity team, @Param("user") UserEntity user);
+
+    @Query("""
+        select assignment
+        from VolunteerChildAssignmentEntity assignment
+        join fetch assignment.child
+        where assignment.team.id = :teamId
+        """)
+    List<VolunteerChildAssignmentEntity> findAllWithChildByTeamId(@Param("teamId") Long teamId);
+
 }

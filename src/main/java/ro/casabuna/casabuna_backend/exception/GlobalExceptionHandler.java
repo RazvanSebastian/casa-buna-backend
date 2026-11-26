@@ -1,5 +1,6 @@
 package ro.casabuna.casabuna_backend.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -63,5 +64,19 @@ public class GlobalExceptionHandler {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
         return ResponseEntity.status(403).body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        Map<String, String> error = new HashMap<>();
+        String message = ex.getMessage();
+        
+        if (message != null && message.contains("uq_volunteer_child_team")) {
+            error.put("error", "Volunteer-child assignment already exists for this team");
+        } else {
+            error.put("error", "Data integrity violation: " + ex.getMostSpecificCause().getMessage());
+        }
+        
+        return ResponseEntity.badRequest().body(error);
     }
 }

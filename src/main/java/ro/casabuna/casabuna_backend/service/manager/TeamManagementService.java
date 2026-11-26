@@ -3,7 +3,7 @@ package ro.casabuna.casabuna_backend.service.manager;
 import org.springframework.data.web.PagedModel;
 import ro.casabuna.casabuna_backend.model.dto.team.TeamResponseDto;
 import ro.casabuna.casabuna_backend.model.dto.team.TeamStructureResponseDto;
-import ro.casabuna.casabuna_backend.model.dto.team.member.TeamVolunteerDto;
+import ro.casabuna.casabuna_backend.model.dto.team.member.TeamMemberDto;
 import ro.casabuna.casabuna_backend.model.dto.user.RoleName;
 import ro.casabuna.casabuna_backend.model.query.PageQuery;
 
@@ -12,7 +12,7 @@ import java.util.List;
 public interface TeamManagementService {
     TeamStructureResponseDto getTeamStructure(Long teamId);
 
-    PagedModel<TeamVolunteerDto> findUnassignedUsers(Long teamId, RoleName roleName, String search, PageQuery pageQuery);
+    PagedModel<TeamMemberDto> findUnassignedUsers(Long teamId, RoleName roleName, String search, PageQuery pageQuery);
 
     void assignMember(Long teamId, Long userId);
 
@@ -29,5 +29,5 @@ public interface TeamManagementService {
 
     void removeChildAssignment(Long teamId, Long volunteerId, Long childId);
 
-    List<TeamResponseDto> getManagerTeams(Long userId);
+    List<TeamResponseDto> getManagedTeams(Long userId);
 }

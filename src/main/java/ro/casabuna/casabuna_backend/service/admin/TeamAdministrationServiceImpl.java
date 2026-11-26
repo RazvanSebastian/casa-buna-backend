@@ -26,6 +26,7 @@ public class TeamAdministrationServiceImpl implements TeamAdministrationService 
         return teamMapper.toDto(teamRepository.save(teamEntity));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public PagedModel<TeamResponseDto> findAll(PageQuery pageQuery, String name) {
         var spec = TeamSpecifications.byName(name);

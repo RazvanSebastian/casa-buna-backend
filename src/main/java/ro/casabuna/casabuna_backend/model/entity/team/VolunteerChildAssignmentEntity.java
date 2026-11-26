@@ -2,6 +2,7 @@ package ro.casabuna.casabuna_backend.model.entity.team;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.Hibernate;
 import ro.casabuna.casabuna_backend.model.entity.BaseEntity;
 import ro.casabuna.casabuna_backend.model.entity.UserEntity;
 

@@ -9,7 +9,7 @@ import ro.casabuna.casabuna_backend.exception.ResourceConditionUnsatisfiedExcept
 import ro.casabuna.casabuna_backend.exception.ResourceNotFound;
 import ro.casabuna.casabuna_backend.model.dto.team.TeamResponseDto;
 import ro.casabuna.casabuna_backend.model.dto.team.TeamStructureResponseDto;
-import ro.casabuna.casabuna_backend.model.dto.team.member.TeamVolunteerDto;
+import ro.casabuna.casabuna_backend.model.dto.team.member.TeamMemberDto;
 import ro.casabuna.casabuna_backend.model.dto.user.RoleName;
 import ro.casabuna.casabuna_backend.model.entity.UserEntity;
 import ro.casabuna.casabuna_backend.model.entity.team.VolunteerChildAssignmentEntity;
@@ -47,10 +47,23 @@ public class TeamManagementServiceImpl implements TeamManagementService {
                 .map(userMapper::toTeamManagerDto)
                 .collect(Collectors.toSet());
 
-        var volunteerSpec = UserSpecifications.teamVolunteersWithAssignedChildren(teamId);
-        var volunteers = userRepository.findAll(volunteerSpec)
+        var childrenByVolunteersId = volunteerChildAssignmentRepository
+                .findAllWithChildByTeamId(teamId)
                 .stream()
-                .map(userMapper::toTeamVolunteerDto)
+                .collect(Collectors.groupingBy(
+                        assignment -> assignment.getVolunteer().getId(),
+                        Collectors.mapping(
+                                assignment -> userMapper.toTeamChildDto(assignment.getChild()),
+                                Collectors.toSet()
+                        )
+                ));
+
+        var teamVolunteersSpec = UserSpecifications.teamVolunteers(teamId);
+        var volunteersWithChildren = userRepository.findAll(teamVolunteersSpec)
+                .stream()
+                .map(volunteer -> userMapper.toTeamVolunteerDto(
+                        volunteer, childrenByVolunteersId.getOrDefault(volunteer.getId(), Set.of())
+                ))
                 .collect(Collectors.toSet());
 
         var unassignedChildrenSpec = UserSpecifications.unassignedChildren(teamId);
@@ -59,15 +72,15 @@ public class TeamManagementServiceImpl implements TeamManagementService {
                 .map(userMapper::toTeamChildDto)
                 .collect(Collectors.toSet());
 
-        return new TeamStructureResponseDto(teamId, managers, volunteers, unassignedChildren);
+        return new TeamStructureResponseDto(teamId, managers, volunteersWithChildren, unassignedChildren);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PagedModel<TeamVolunteerDto> findUnassignedUsers(Long teamId, RoleName roleName, String search, PageQuery pageQuery) {
+    public PagedModel<TeamMemberDto> findUnassignedUsers(Long teamId, RoleName roleName, String search, PageQuery pageQuery) {
         var spec = UserSpecifications.usersNotInTeam(teamId, roleName, search);
         var usersPage = userRepository.findAll(spec, pageQuery.toPageRequest())
-                .map(userMapper::toTeamVolunteerDto);
+                .map(userMapper::toTeamMemberDto);
         return new PagedModel<>(usersPage);
     }
 
@@ -104,7 +117,9 @@ public class TeamManagementServiceImpl implements TeamManagementService {
     @Override
     @Transactional
     public void assignChildToVolunteer(Long teamId, Long volunteerId, Long childId) {
-        if (userRepository.existsByIdAndTeamsId(volunteerId, teamId) && userRepository.existsByIdAndTeamsId(childId, teamId)) {
+        var respectTeamAndRoles = userRepository.existsByIdAndTeamIdAndRoleNames(volunteerId, teamId, Set.of(RoleName.ROLE_VOLUNTEER))
+                && userRepository.existsByIdAndTeamIdAndRoleNames(childId, teamId, Set.of(RoleName.ROLE_CHILD));
+        if (respectTeamAndRoles) {
             VolunteerChildAssignmentEntity newAssignment = VolunteerChildAssignmentEntity.builder()
                     .team(teamRepository.getReferenceById(teamId))
                     .volunteer(userRepository.getReferenceById(volunteerId))
@@ -130,7 +145,7 @@ public class TeamManagementServiceImpl implements TeamManagementService {
     @Override
     @Transactional(readOnly = true)
     @IsAssociatedManager(required = false)
-    public List<TeamResponseDto> getManagerTeams(Long userId) {
+    public List<TeamResponseDto> getManagedTeams(Long userId) {
         var spec = TeamSpecifications.byAssignedManager(userId);
         return teamRepository.findAll(spec).stream()
                 .map(teamMapper::toDto)

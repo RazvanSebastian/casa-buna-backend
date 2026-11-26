@@ -13,7 +13,7 @@ public interface UserAdministrationService {
 
     void updateRoles(long id, Set<RoleName> roles);
 
-    PagedModel<UserDto> getAllUsers(PageQuery pageQuery, @Nullable String email);
+    PagedModel<UserDto> getAllUsersWithRoles(PageQuery pageQuery, @Nullable String email);
 
     Set<RoleDto> getAllRoles();
 }

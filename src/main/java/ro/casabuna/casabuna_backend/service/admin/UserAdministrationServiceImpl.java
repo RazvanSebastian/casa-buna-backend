@@ -41,7 +41,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     }
 
     @Override
-    public PagedModel<UserDto> getAllUsers(PageQuery pageQuery, String email) {
+    public PagedModel<UserDto> getAllUsersWithRoles(PageQuery pageQuery, String email) {
         Specification<UserEntity> spec = UserSpecifications.equalsIfPresent("email", email, true);
         Page<UserDto> userModelPage = userRepository.findAll(spec, pageQuery.toPageRequest())
                 .map(userMapper::toUserDtoWithRoles);

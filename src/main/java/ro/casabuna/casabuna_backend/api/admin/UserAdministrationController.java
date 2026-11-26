@@ -37,6 +37,6 @@ public class UserAdministrationController {
     @GetMapping("/all")
     public PagedModel<UserDto> getAllUsers(@ModelAttribute PageQuery pageQuery,
                                            @RequestParam(name = "email", required = false) @Nullable String email) {
-        return userAdministrationService.getAllUsers(pageQuery, email);
+        return userAdministrationService.getAllUsersWithRoles(pageQuery, email);
     }
 }

@@ -58,14 +58,14 @@ public class UserEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        UserEntity that = (UserEntity) o;
-        return Objects.equals(email, that.email);
+        if (this == o) return true;
+        if (!(o instanceof UserEntity other)) return false;
+        return getId() != null && getId().equals(other.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email);
+        return UserEntity.class.hashCode();
     }
 }
 

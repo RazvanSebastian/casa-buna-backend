@@ -46,7 +46,7 @@ public final class UserSpecifications {
         };
     }
 
-    public static Specification<UserEntity> teamVolunteersWithAssignedChildren(Long teamId) {
+    public static Specification<UserEntity> teamVolunteers(Long teamId) {
         return (root, query, criteriaBuilder) -> {
             var predicates = new ArrayList<>();
 
@@ -59,9 +59,6 @@ public final class UserSpecifications {
             predicates.add(teamPredicate);
 
             query.distinct(true);
-
-            var assignmentFetch = root.fetch(UserEntity_.childAssignments, JoinType.LEFT);
-            assignmentFetch.fetch(VolunteerChildAssignmentEntity_.child, JoinType.LEFT);
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };

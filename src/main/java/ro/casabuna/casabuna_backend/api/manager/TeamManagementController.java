@@ -8,7 +8,7 @@ import ro.casabuna.casabuna_backend.configuration.security.jwt.UserPrincipal;
 import ro.casabuna.casabuna_backend.exception.InvalidRequestException;
 import ro.casabuna.casabuna_backend.model.dto.team.TeamResponseDto;
 import ro.casabuna.casabuna_backend.model.dto.team.TeamStructureResponseDto;
-import ro.casabuna.casabuna_backend.model.dto.team.member.TeamVolunteerDto;
+import ro.casabuna.casabuna_backend.model.dto.team.member.TeamMemberDto;
 import ro.casabuna.casabuna_backend.model.dto.user.RoleName;
 import ro.casabuna.casabuna_backend.model.query.PageQuery;
 import ro.casabuna.casabuna_backend.service.manager.TeamManagementService;
@@ -23,7 +23,7 @@ public class TeamManagementController {
 
     @GetMapping("/assigned")
     public List<TeamResponseDto> getManagerTeams(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return teamManagementService.getManagerTeams(userPrincipal.id());
+        return teamManagementService.getManagedTeams(userPrincipal.id());
     }
 
     @GetMapping("/{teamId}/structure")
@@ -32,7 +32,7 @@ public class TeamManagementController {
     }
 
     @GetMapping("/{teamId}/users/unassigned")
-    public PagedModel<TeamVolunteerDto> findUnassignedUsers(
+    public PagedModel<TeamMemberDto> findUnassignedUsers(
             @PathVariable Long teamId,
             @RequestParam(name = "role") RoleName roleName,
             @RequestParam(name="search") String search,
