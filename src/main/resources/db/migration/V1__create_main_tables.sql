@@ -135,6 +135,11 @@ CREATE TABLE IF NOT EXISTS volunteer_requests
     CONSTRAINT fk_volunteer_requests_approver FOREIGN KEY (approver_user_id) REFERENCES users (id) ON DELETE SET NULL
 );
 
+-- Partial unique index: only one PENDING request per user
+CREATE UNIQUE INDEX uq_volunteer_pending_request 
+ON volunteer_requests (requestor_user_id) 
+WHERE status = 'PENDING';
+
 -- Create sequence for notifications
 CREATE SEQUENCE IF NOT EXISTS notifications_seq START WITH 1 INCREMENT BY 1;
 

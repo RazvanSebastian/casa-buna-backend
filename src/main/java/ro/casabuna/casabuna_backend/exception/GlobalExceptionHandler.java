@@ -70,13 +70,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         Map<String, String> error = new HashMap<>();
         String message = ex.getMessage();
-        
+
         if (message != null && message.contains("uq_volunteer_child_team")) {
             error.put("error", "Volunteer-child assignment already exists for this team");
+        } else if (message != null && message.contains("uq_volunteer_pending_request")) {
+            error.put("error", "A request already exists in pending");
         } else {
             error.put("error", "Data integrity violation: " + ex.getMostSpecificCause().getMessage());
         }
-        
+
         return ResponseEntity.badRequest().body(error);
     }
 }

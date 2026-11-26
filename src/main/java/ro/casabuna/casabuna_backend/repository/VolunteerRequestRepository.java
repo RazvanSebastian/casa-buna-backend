@@ -13,5 +13,6 @@ public interface VolunteerRequestRepository extends JpaRepository<VolunteerReque
 
     boolean existsByRequestor_IdAndStatus(Long userId, VolunteerRequestStatus status);
 
+    // Uniqueness for PENDING status guaranteed by uq_volunteer_pending_request partial unique index
     Optional<VolunteerRequestEntity> findByRequestor_IdAndStatus(Long userId, VolunteerRequestStatus status);
 }
