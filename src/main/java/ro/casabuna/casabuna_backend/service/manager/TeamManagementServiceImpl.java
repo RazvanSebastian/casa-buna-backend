@@ -1,6 +1,7 @@
 package ro.casabuna.casabuna_backend.service.manager;
 
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,9 @@ import ro.casabuna.casabuna_backend.model.entity.team.VolunteerChildAssignmentEn
 import ro.casabuna.casabuna_backend.model.mapper.team.TeamMapper;
 import ro.casabuna.casabuna_backend.model.mapper.user.UserMapper;
 import ro.casabuna.casabuna_backend.model.query.PageQuery;
+import ro.casabuna.casabuna_backend.notification.model.event.UserEvent;
+import ro.casabuna.casabuna_backend.notification.service.NotificationService;
+import ro.casabuna.casabuna_backend.notification.service.NotificationSubscriptionService;
 import ro.casabuna.casabuna_backend.repository.TeamRepository;
 import ro.casabuna.casabuna_backend.repository.UserRepository;
 import ro.casabuna.casabuna_backend.repository.VolunteerChildAssignmentRepository;
@@ -34,6 +38,8 @@ public class TeamManagementServiceImpl implements TeamManagementService {
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
     private final VolunteerChildAssignmentRepository volunteerChildAssignmentRepository;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     private final UserMapper userMapper;
     private final TeamMapper teamMapper;
@@ -88,9 +94,17 @@ public class TeamManagementServiceImpl implements TeamManagementService {
     @Transactional
     public void assignMember(Long teamId, Long userId) {
         Set<RoleName> allowedRoles = Set.of(RoleName.ROLE_VOLUNTEER, RoleName.ROLE_CHILD);
-        UserEntity userEntity = userRepository.findWithTeamsByIdAndRoles(userId, allowedRoles)
+        var userEntity = userRepository.findWithTeamsByIdAndRoles(userId, allowedRoles)
                 .orElseThrow(() -> new ResourceConditionUnsatisfiedException("User must have ROLE_VOLUNTEER or ROLE_CHILD to be assigned to a team"));
-        userEntity.getTeams().add(teamRepository.getReferenceById(teamId));
+        var teamEntity = teamRepository.findById(teamId).orElseThrow(() -> new ResourceNotFound("Team not found"));
+        userEntity.getTeams().add(teamEntity);
+        eventPublisher.publishEvent(
+                new UserEvent(
+                        userId,
+                        "Nou in echipa",
+                        "Ai fost adaugat in echipa " + teamEntity.getName()
+                )
+        );
     }
 
     @Override
@@ -104,7 +118,7 @@ public class TeamManagementServiceImpl implements TeamManagementService {
             throw new ResourceConditionUnsatisfiedException("User must be a volunteer or child to be removed from team");
         }
 
-        var teamEntity = teamRepository.getReferenceById(teamId);
+        var teamEntity = teamRepository.findById(teamId).orElseThrow(() -> new ResourceNotFound("Team not found"));
         var userEntity = userRepository.getReferenceById(userId);
 
         // Remove all volunteer-child assignments for this user in this team
@@ -112,6 +126,14 @@ public class TeamManagementServiceImpl implements TeamManagementService {
 
         // Remove user from team
         userRepository.deleteTeamMember(userId, teamId);
+
+        eventPublisher.publishEvent(
+                new UserEvent(
+                        userId,
+                        "Scos din echipa",
+                        "Ai fost scos din echipa " + teamEntity.getName()
+                )
+        );
     }
 
     @Override
@@ -120,12 +142,32 @@ public class TeamManagementServiceImpl implements TeamManagementService {
         var respectTeamAndRoles = userRepository.existsByIdAndTeamIdAndRoleNames(volunteerId, teamId, Set.of(RoleName.ROLE_VOLUNTEER))
                 && userRepository.existsByIdAndTeamIdAndRoleNames(childId, teamId, Set.of(RoleName.ROLE_CHILD));
         if (respectTeamAndRoles) {
+            var childEntity = userRepository.findById(childId).orElseThrow(() -> new ResourceNotFound("Child not found"));
+            var volunteerEntity = userRepository.findById(volunteerId).orElseThrow(() -> new ResourceNotFound("Volunteer not found"));
+            var teamEntity = teamRepository.findById(teamId).orElseThrow(() -> new ResourceNotFound("Team not found"));
+
             VolunteerChildAssignmentEntity newAssignment = VolunteerChildAssignmentEntity.builder()
-                    .team(teamRepository.getReferenceById(teamId))
-                    .volunteer(userRepository.getReferenceById(volunteerId))
-                    .child(userRepository.getReferenceById(childId))
+                    .team(teamEntity)
+                    .volunteer(volunteerEntity)
+                    .child(childEntity)
                     .build();
             volunteerChildAssignmentRepository.save(newAssignment);
+
+            eventPublisher.publishEvent(
+                    new UserEvent(
+                            volunteerId,
+                            "Copil asignat",
+                            childEntity.getFirstName() + " " + childEntity.getLastName() + " ti-a fost asignat in echipa " + teamEntity.getName() + " pentru voluntariat!"
+                    )
+            );
+
+            eventPublisher.publishEvent(
+                    new UserEvent(
+                            childId,
+                            "Voluntar asignat",
+                            volunteerEntity.getFirstName() + " " + volunteerEntity.getLastName() + " ti-a fost asignat in echipa " + teamEntity.getName()
+                    )
+            );
         } else {
             throw new ResourceConditionUnsatisfiedException("Volunteer or child should be assigned to the team " + teamId);
         }
@@ -134,12 +176,32 @@ public class TeamManagementServiceImpl implements TeamManagementService {
     @Override
     @Transactional
     public void removeChildAssignment(Long teamId, Long volunteerId, Long childId) {
+        var volunteerEntity = userRepository.findById(volunteerId).orElseThrow(() -> new ResourceNotFound("Volunteer not found"));
+        var childEntity = userRepository.findById(childId).orElseThrow(() -> new ResourceNotFound("Child not found"));
+        var teamEntity = teamRepository.findById(teamId).orElseThrow(() -> new ResourceNotFound("Team not found"));
+
         VolunteerChildAssignmentEntity assignmentEntity = volunteerChildAssignmentRepository.findByVolunteerAndChildAndTeam(
-                userRepository.getReferenceById(volunteerId),
-                userRepository.getReferenceById(childId),
-                teamRepository.getReferenceById(teamId)
+                volunteerEntity,
+                childEntity,
+                teamEntity
         ).orElseThrow(() -> new ResourceNotFound("Assignment not found"));
         volunteerChildAssignmentRepository.delete(assignmentEntity);
+
+        eventPublisher.publishEvent(
+                new UserEvent(
+                        volunteerId,
+                        "Revocare asignare copil",
+                        childEntity.getFirstName() + " " + childEntity.getLastName() + " nu iti mai este asignat in echipa " + teamEntity.getName() + " pentru voluntariat!"
+                )
+        );
+
+        eventPublisher.publishEvent(
+                new UserEvent(
+                        volunteerId,
+                        "Revocare asignare voluntar",
+                        volunteerEntity.getFirstName() + " " + volunteerEntity.getLastName() + " nu iti mai este asignat in echipa " + teamEntity.getName() + " pentru voluntariat!"
+                )
+        );
     }
 
     @Override
